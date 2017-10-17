@@ -8,6 +8,10 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +36,7 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
 
     public DrawnerItemClickListener(LomuxMapActivity view) {
         this.view = view;
+        this.searchView = view.findViewById(R.id.searchbar);
     }
 
     /**
@@ -85,7 +90,7 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
         }
         Log.d("CLICK", "test"+ id);
         DrawerLayout drawer = view.findViewById(R.id.drawer_layout);
-        drawer.addDrawerListener(new Drawer_listener(item));
+        drawer.addDrawerListener(new Drawer_listener(item, drawer));
 
         drawer.closeDrawer(GravityCompat.START);
 
@@ -98,17 +103,22 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
     }
 
     private void press_search(){
-         searchView = view.findViewById(R.id.searchbar);
-        if(searchView.getVisibility()!=View.VISIBLE) {
-            searchView.setVisibility(View.VISIBLE);
 
-            searchView.setAlpha(0.0f);
+        if(searchView.getVisibility()!=View.VISIBLE) {
+
+           /* searchView.setAlpha(0.0f);
             searchView.setScaleX(1.4f);
             searchView.setScaleY(1.4f);
             searchView.animate().
                     scaleX(1).
                     scaleY(1)
-                    .alpha(.8f);
+                    .alpha(.8f);*/
+
+            Animation slide_down = AnimationUtils.loadAnimation(view.getApplicationContext(),
+                    R.anim.slide_down);
+            searchView.startAnimation(slide_down);
+            searchView.setAlpha(.85f);
+            searchView.setVisibility(View.VISIBLE);
         }
         else{
 
@@ -118,9 +128,12 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
 
     private class Drawer_listener implements DrawerLayout.DrawerListener{
         private MenuItem item;
+        private DrawerLayout drawer;
 
-        private Drawer_listener(MenuItem item){
+
+        private Drawer_listener(MenuItem item, DrawerLayout drawer){
             this.item = item;
+            this.drawer = drawer;
         }
 
         @Override
@@ -130,10 +143,7 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
 
         @Override
         public void onDrawerOpened(View drawerView) {
-            if(searchView.isInTouchMode()){
-                searchView.setQuery(searchView.getQuery(),false);
-                searchView.setIconified(true);
-            }
+
         }
 
         @Override
@@ -144,6 +154,19 @@ public class DrawnerItemClickListener implements  NavigationView.OnNavigationIte
 
         @Override
         public void onDrawerStateChanged(int newState) {
+            if (newState == DrawerLayout.STATE_SETTLING) {
+                if (!drawer.isDrawerOpen(Gravity.START)) {
+                    // starts opening
+
+                    if(searchView.isInTouchMode()){
+                        searchView.setQuery(searchView.getQuery(),false);
+                        searchView.setIconified(true);
+                    }
+
+                } else {
+                    // closing drawer
+                }
+            }
 
         }
     }

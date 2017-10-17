@@ -2,64 +2,50 @@ package com.example.stefano.lomux_pro;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.webkit.WebHistoryItem;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 
 import com.example.stefano.lomux_pro.callbacks.PinsCallback;
 import com.example.stefano.lomux_pro.listener.DrawnerItemClickListener;
 import com.example.stefano.lomux_pro.listener.MapChangesListener;
 import com.example.stefano.lomux_pro.model.Pin;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.MarkerManager;
 import com.google.maps.android.clustering.ClusterManager;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cz.msebera.android.httpclient.client.cache.Resource;
-
-import static android.R.attr.button;
-import static android.R.attr.theme;
 
 public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMapClickListener,GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private final static LatLng london_center = new LatLng(51.509865, -0.118092);
+    private final  int panelInfoHeigth = 200;
     private ClusterManager<Pin> mClusterManager;
     private SearchView searchView;
-    private Marker clickedMarker=null;
     private List<String> ids;
+    SlidingUpPanelLayout slidingUpPanelLayout;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -72,7 +58,9 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new DrawnerItemClickListener(this));
         searchView = findViewById(R.id.searchbar);
-        searchView = findViewById(R.id.searchbar);
+        slidingUpPanelLayout = findViewById(R.id.sliding_layout);
+        slidingUpPanelLayout.setOverlayed(true);
+        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         searchView.setIconifiedByDefault(true);
         searchView.setQueryHint("Search a Pin");
         searchView.clearFocus();
@@ -81,8 +69,25 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View view) {
                 if(searchView.isIconified()){
                     searchView.setIconified(false);
-                    searchView.performClick();
+                    //searchView.performClick();
                 }
+            }
+        });
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //the keyboard is shown, change the map fragment
+// Create new fragment and transaction
+             /*   Fragment newFragment = new MapInfoFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack if needed
+                transaction.replace(R.id.map, newFragment);
+                transaction.addToBackStack(null);
+
+// Commit the transaction
+                transaction.commit();*/
             }
         });
 
@@ -131,62 +136,28 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
         MapChangesListener mapChangesListener =new MapChangesListener(mMap,this);
         mMap.setOnCameraIdleListener(mapChangesListener);
         PinsCallback.getInstance().get_local_pins(mMap,mapChangesListener.getActualVisibleArea(),ids,this);
-        Log.d("PIN","MAR "+mClusterManager.getMarkerCollection().getMarkers().size());
     }
 
-    public void cluster(){
-        mClusterManager.cluster();
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void addPins(List<Pin> pins){
-       // mClusterManager.clearItems();
-      /*  if(mClusterManager.getMarkerCollection().getMarkers().isEmpty()){
-            mClusterManager.clearItems();
-            mClusterManager.addItems(pins);
-        }
-        /*TODO: Is it efficent??*//*
-        else{
-            for (Pin elem : pins) {
-                if (!isInMarker(elem))
-                    mClusterManager.addItem(elem);
-            }
-        }
-*/
-       // mClusterManager.clearItems();
-        Log.d("PIN"," dim "+pins.size());
+
         for(Pin elem:pins){
             ids.add(elem.getIdPin());
             mClusterManager.addItem(elem);
         }
         mClusterManager.cluster();
-       // mClusterManager.cluster();
-      /* if(clickedMarker!=null) {
-            for(Marker marker:mClusterManager.getMarkerCollection().getMarkers()){
-                if(clickedMarker.getPosition().equals(marker.getPosition())){
-                   mClusterManager.onMarkerClick(marker);
-                    clickedMarker = null;
-                    return;
-                }
-            }
-        }*/
     }
 
     public void clusterManagerOnCameraIdle(){
         mClusterManager.onCameraIdle();
     }
-    public boolean isInMarker (Pin  pin){
-        for (Marker mark : mClusterManager.getMarkerCollection().getMarkers()){
-
-            if (pin.getPosition().latitude==mark.getPosition().latitude && pin.getPosition().longitude==mark.getPosition().longitude)
-                return true;
-        }
-        return false;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onMapClick(LatLng latLng) {
+        if (slidingUpPanelLayout.getPanelState()== SlidingUpPanelLayout.PanelState.EXPANDED)
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else if(slidingUpPanelLayout.getPanelState()== SlidingUpPanelLayout.PanelState.COLLAPSED)
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         View v =getCurrentFocus();
         if(v!=null && (searchView.getVisibility()!=View.GONE)){
             if(searchView.isIconified()){
@@ -239,17 +210,26 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
         else if(searchView.getVisibility()==View.VISIBLE){
             onMapClick(mMap.getCameraPosition().target);
         }
-        else {
+        else if (slidingUpPanelLayout.getPanelState()== SlidingUpPanelLayout.PanelState.EXPANDED)
+                slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else if(slidingUpPanelLayout.getPanelState()== SlidingUpPanelLayout.PanelState.COLLAPSED)
+                slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+
+        else
             super.onBackPressed();
-        }
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onMarkerClick(Marker marker) {
-       clickedMarker=marker;
         if(searchView.getVisibility()==View.VISIBLE)
             onMapClick(mMap.getCameraPosition().target);
+
+        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         return mClusterManager.onMarkerClick(marker);
     }
+
+
 }

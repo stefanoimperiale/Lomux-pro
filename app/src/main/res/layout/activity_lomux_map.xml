@@ -7,8 +7,13 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
+
+
     <!-- The main content view -->
-    <include layout="@layout/activity_lomux_map_content" />
+    <include
+        layout="@layout/activity_lomux_map_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <!-- The navigation drawer -->
     <android.support.design.widget.NavigationView
@@ -16,9 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
         android:choiceMode="singleChoice"
+        android:fitsSystemWindows="true"
         app:headerLayout="@layout/activity_lomux_map_drawer_menu"
         app:menu="@menu/activity_main_drawer" />
-
 </android.support.v4.widget.DrawerLayout>
