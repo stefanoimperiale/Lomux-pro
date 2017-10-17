@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. -->
+    <style name="MyTheme" parent="@style/Theme.AppCompat.Light.NoActionBar" tools:targetApi="lollipop">        <!-- Customize your theme here.
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>-->
+
+            <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/transparent</item>
+            <item name="android:navigationBarColor" tools:targetApi="lollipop">@android:color/transparent</item>
+            <item name="android:windowTranslucentStatus">true</item>
+            <item name="android:windowTranslucentNavigation">true</item>
+        </style>
+
+</resources>
