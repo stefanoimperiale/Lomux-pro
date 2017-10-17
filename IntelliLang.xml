@@ -1,0 +1,13 @@
+<application>
+  <component name="LanguageInjectionConfiguration">
+    <option name="INSTRUMENTATION" value="ASSERT" />
+    <option name="LANGUAGE_ANNOTATION" value="org.intellij.lang.annotations.Language" />
+    <option name="PATTERN_ANNOTATION" value="org.intellij.lang.annotations.Pattern" />
+    <option name="SUBST_ANNOTATION" value="org.intellij.lang.annotations.Subst" />
+    <option name="RESOLVE_REFERENCES" value="true" />
+    <injection language="XML" injector-id="xml">
+      <display-name>set/@name</display-name>
+      <place><![CDATA[xmlAttribute().withLocalName(string().equalTo("name")).withParent(xmlTag().withLocalName(string().equalTo("set")))]]></place>
+    </injection>
+  </component>
+</application>
