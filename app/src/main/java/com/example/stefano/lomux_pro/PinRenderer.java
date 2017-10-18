@@ -11,6 +11,7 @@ package com.example.stefano.lomux_pro;
         import com.example.stefano.lomux_pro.model.Pintype;
         import com.google.android.gms.maps.GoogleMap;
         import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+        import com.google.android.gms.maps.model.Marker;
         import com.google.android.gms.maps.model.MarkerOptions;
         import com.google.maps.android.clustering.ClusterManager;
         import com.google.maps.android.clustering.*;
@@ -52,6 +53,16 @@ public class PinRenderer extends DefaultClusterRenderer<Pin> {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_icon_l));
 
         }
+    }
+
+    @Override
+    public Marker getMarker(Pin clusterItem) {
+        return super.getMarker(clusterItem);
+    }
+
+    @Override
+    public Pin getClusterItem(Marker marker) {
+        return super.getClusterItem(marker);
     }
 
     @Override

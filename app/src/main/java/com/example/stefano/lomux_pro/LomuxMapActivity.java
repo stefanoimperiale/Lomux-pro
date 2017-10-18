@@ -12,6 +12,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
@@ -22,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.SearchView;
 
 import com.example.stefano.lomux_pro.callbacks.PinsCallback;
+import com.example.stefano.lomux_pro.listener.ClusterMangerListener;
 import com.example.stefano.lomux_pro.listener.DrawnerItemClickListener;
 import com.example.stefano.lomux_pro.listener.MapChangesListener;
 import com.example.stefano.lomux_pro.model.Pin;
@@ -31,13 +33,18 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.internal.zzp;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMapClickListener,GoogleMap.OnMarkerClickListener {
+public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
     private final static LatLng london_center = new LatLng(51.509865, -0.118092);
@@ -46,6 +53,7 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
     private SearchView searchView;
     private List<String> ids;
     SlidingUpPanelLayout slidingUpPanelLayout;
+    PinRenderer pinRenderer;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -119,10 +127,11 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
         mMap.moveCamera(CameraUpdateFactory.zoomTo(zoom));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mClusterManager = new ClusterManager<Pin>(this, mMap);
+        mClusterManager = new ClusterManager<>(this, mMap);
         mClusterManager.setAnimation(true);
-        mClusterManager.setRenderer(new PinRenderer(this.getApplicationContext(), mMap, mClusterManager));
-        mMap.setOnMarkerClickListener(this);
+        pinRenderer = new PinRenderer(this.getApplicationContext(), mMap, mClusterManager);
+        mClusterManager.setRenderer(pinRenderer);
+        mMap.setOnMarkerClickListener(new ClusterMangerListener(mClusterManager,pinRenderer,slidingUpPanelLayout));
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLoadedCallback(this);
 
@@ -220,16 +229,5 @@ public class LomuxMapActivity extends FragmentActivity implements OnMapReadyCall
 
 
     }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        if(searchView.getVisibility()==View.VISIBLE)
-            onMapClick(mMap.getCameraPosition().target);
-
-        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        return mClusterManager.onMarkerClick(marker);
-    }
-
 
 }
